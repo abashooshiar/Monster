@@ -16,12 +16,17 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	random := randomInt(1, 20)
+
+	Angrenzend(random, dimensionsArray)
+
+}
+func Angrenzend(random int, dimensionsArray [21][3]int) {
 	fmt.Println("Du befindest dich in Raum : ", random)
 
 	for p := range dimensionsArray {
 		for i := 0; i < len(dimensionsArray); i++ {
 			if random == p {
-				fmt.Println("Angrenzende Räume sind : ", dimensionsArray[p]) //  :  [1,7,8]
+				fmt.Println("Angrenzende Räume sind : ", dimensionsArray[p])
 				break
 			}
 		}
@@ -35,37 +40,34 @@ func main() {
 	}
 
 	Finder(random, j, dimensionsArray)
-
 }
+
 func randomInt(min, max int) int {
 	return min + rand.Intn(max-min)
 }
 func Finder(random, j int, dimensional [21][3]int) {
-	for h := range dimensional {
-		for i := 0; i < len(dimensional); i++ {
-			if random == h {
-				//fmt.Println("Angrenzende Räume sind : ", dimensional[h]) //  :  [1,7,8]
-				//fmt.Println("Du befindest dich in Raum:", j)             // j
-				a := dimensional[h]
-				t := FindIn(a[:], j)
-				if t == 1 {
-					fmt.Println("du darfst in Raum", j)
-					return
-				} else {
-					fmt.Println("Du kannst von hier nicht in Raum ", j)
-					return
-				}
-
+	for h, _ := range dimensional {
+		if h == random {
+			a := dimensional[h]
+			sw := FindIn(a[:], j)
+			if sw == true {
+				random = j
+				Angrenzend(random, dimensional)
+				break
+			} else {
+				fmt.Println("Du kannst von hier nicht in Raum ", j)
+				Angrenzend(random, dimensional)
+				break
 			}
 		}
 	}
 }
-func FindIn(a []int, j int) int {
-	t := 0
+func FindIn(a []int, j int) bool {
+	sw := false
 	for _, content := range a {
 		if content == j {
-			t = 1
+			sw = true
 		}
 	}
-	return t
+	return sw
 }
