@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -22,52 +22,45 @@ func main() {
 }
 func Angrenzend(random int, dimensionsArray [21][3]int) {
 	fmt.Println("Du befindest dich in Raum : ", random)
-
-	for p := range dimensionsArray {
-		for i := 0; i < len(dimensionsArray); i++ {
-			if random == p {
-				fmt.Println("Angrenzende Räume sind : ", dimensionsArray[p])
-				break
-			}
-		}
-	}
-
+	fmt.Println("Angrenzende Räume sind : ", dimensionsArray[random])
 	fmt.Print("Wohin möchtest Du gehen? : ")
-	var j int
-	if _, err := fmt.Scan(&j); err != nil {
-		log.Print("  Scan Destination node ", err)
-		return
+
+	var WohinGehen int
+	if _, err := fmt.Scan(&WohinGehen); err != nil {
+		if !(WohinGehen >= '0' && WohinGehen <= '9') {
+			fmt.Println("Bitte geben Sie eine Nummer ein")
+			Angrenzend(random, dimensionsArray)
+			return
+		}
+		fmt.Fprintln(os.Stderr, err)
 	}
 
-	Finder(random, j, dimensionsArray)
+	Finder(random, WohinGehen, dimensionsArray)
 }
 
 func randomInt(min, max int) int {
 	return min + rand.Intn(max-min)
 }
-func Finder(random, j int, dimensional [21][3]int) {
-	for h, _ := range dimensional {
-		if h == random {
-			a := dimensional[h]
-			sw := FindIn(a[:], j)
-			if sw == true {
-				random = j
-				Angrenzend(random, dimensional)
-				break
-			} else {
-				fmt.Println("Du kannst von hier nicht in Raum ", j)
-				Angrenzend(random, dimensional)
-				break
-			}
-		}
+func Finder(random, WohinGehen int, dimensional [21][3]int) {
+
+	IndexOfDimensional := dimensional[random]
+	sw := FindIn(IndexOfDimensional[:], WohinGehen)
+	if sw == true {
+		random = WohinGehen
+		Angrenzend(random, dimensional)
+		return
+	} else {
+		fmt.Println("Du kannst von hier nicht in Raum ", WohinGehen)
+		Angrenzend(random, dimensional)
+		return
 	}
 }
-func FindIn(a []int, j int) bool {
-	sw := false
-	for _, content := range a {
-		if content == j {
-			sw = true
+func FindIn(DimensionalContent []int, WohinGehen int) bool {
+	SwitchKey := false
+	for _, content := range DimensionalContent {
+		if content == WohinGehen {
+			SwitchKey = true
 		}
 	}
-	return sw
+	return SwitchKey
 }
