@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -14,44 +15,64 @@ func main() {
 		{10, 15, 17}, {11, 16, 20}, {12, 13, 20}, {14, 15, 20}, {17, 18, 19}}
 
 	rand.Seed(time.Now().UnixNano())
-	random := randomInt(1, 20)
-	angrenzend(random, dimensionsArray)
+	zufall := randomint(1, 20)
+	Zufallszahl := randomint(1, 20)
+	fmt.Println("Zufallszahlenstart(Nur Erinnerungstest):", Zufallszahl)
+	angrenzend(zufall, dimensionsArray, Zufallszahl)
 
 }
-func angrenzend(random int, dimensionsArray [20][3]int) {
-	fmt.Println("Du befindest dich in Raum : ", random)
-	fmt.Println("Angrenzende Räume sind : ", dimensionsArray[random-1])
-	fmt.Print("Wohin möchtest Du gehen? : ")
+func angrenzend(zufall int, dimensionsArray [20][3]int, Zufallszahl int) {
+	fmt.Println("Du befindest dich in Raum : ", zufall)
+	fmt.Println("Angrenzende Räume sind : ", dimensionsArray[zufall-1])
 
-	var wohingehen int
-	if _, err := fmt.Scan(&wohingehen); err != nil {
-		fmt.Print("Bitte geben Sie eine Nummer ein : ")
-		fmt.Scan(&wohingehen)
-	}
-	finder(random, wohingehen, dimensionsArray)
-}
-
-func randomInt(min, max int) int {
-	return min + rand.Intn(max-min)
-}
-func finder(random, wohingehen int, dimensional [20][3]int) {
-
-	indexOfDimensional := dimensional[random-1]
-	sw := findIn(indexOfDimensional[:], wohingehen)
-	if sw == true {
-		random = wohingehen
-		angrenzend(random, dimensional)
-	} else {
-		fmt.Println("Du kannst von hier nicht in Raum ", wohingehen)
-		angrenzend(random, dimensional)
-	}
-}
-func findIn(dimensionalContent []int, wohingehen int) bool {
-	switchKey := false
-	for _, content := range dimensionalContent {
-		if content == wohingehen {
-			switchKey = true
+	for _, inhalts := range dimensionsArray[zufall-1] {
+		if inhalts == Zufallszahl {
+			fmt.Println("Es stinkt bestialisch.")
 		}
 	}
-	return switchKey
+
+	fmt.Print("Wohin möchtest Du gehen? : ")
+	var wohingehen int
+	if _, err := fmt.Scan(&wohingehen); err != nil {
+		fmt.Print("Bitte geben Sie eine Nummer__ ")
+	}
+
+	if wohingehen == Zufallszahl {
+		fmt.Println("Du hast das Monster gefunden!")
+		fmt.Println("drücken Sie 'j', um das Spiel zu beenden.Andernfalls geben Sie eine Zahl ein.")
+
+		var exit int
+		if _, err := fmt.Scan(&exit); err != nil {
+			os.Exit(0)
+		}
+	}
+	finder(zufall, wohingehen, dimensionsArray, Zufallszahl)
+}
+
+func randomint(min, max int) int {
+	return min + rand.Intn(max-min)
+}
+func finder(zufall, wohingehen int, dimensional [20][3]int, Zufallszahl int) {
+	indexOfDimensional := dimensional[zufall-1]
+
+	sw, _ := findin(indexOfDimensional[:], wohingehen, Zufallszahl)
+	if sw == true {
+		fmt.Println("----------------------------")
+		fmt.Println("Zufallszahl(Erinnerungstest und anknüpfen):", Zufallszahl)
+		zufall = wohingehen
+		angrenzend(zufall, dimensional, Zufallszahl)
+	} else {
+		fmt.Println("Du kannst von hier nicht in Raum ", wohingehen)
+		angrenzend(zufall, dimensional, Zufallszahl)
+	}
+}
+func findin(arrayinhalt []int, wohingehen int, Zufallszahl int) (bool, int) {
+	switchKey := false
+	for _, inhalt := range arrayinhalt {
+		if inhalt == wohingehen {
+			switchKey = true
+			//return switchKey, Zufallszahl
+		}
+	}
+	return switchKey, 0
 }
