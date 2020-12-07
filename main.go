@@ -14,48 +14,36 @@ func main() {
 		{5, 12, 17}, {6, 11, 18}, {7, 14, 18}, {8, 13, 19}, {9, 16, 19},
 		{10, 15, 17}, {11, 16, 20}, {12, 13, 20}, {14, 15, 20}, {17, 18, 19}}
 
-	rand.Seed(time.Now().UnixNano())
-	zufall := randomint(1, 20)
-	Zufallszahl := randomint(1, 20)
-	slice := make([]int, 2)
-	slice[0] = randomint(1, 20)
-	slice[1] = randomint(1, 20)
-	fmt.Println("Zufallszahl(", Zufallszahl, ")")
-
-	heimstart := startraum(slice, zufall, dimensionsArray)
-	if heimstart == false {
-		angrenzend(zufall, dimensionsArray, Zufallszahl, slice)
-	} else if heimstart == true {
-		//fmt.Println("Ich glaube, es gibt beim Startraum() ein Problem!!")
-		rand.Seed(time.Now().UnixNano())
-		slice := make([]int, 2)
-		slice[0] = randomint(1, 20)
-		slice[1] = randomint(1, 20)
-		startraum(slice, zufall, dimensionsArray)
-		angrenzend(zufall, dimensionsArray, Zufallszahl, slice)
-	}
+	slice := make([]int, 4)
+	raum, zufallszahl, slice := random(slice)
+	startraum(slice, raum, zufallszahl, dimensionsArray)
 
 }
-func angrenzend(zufall int, dimensionsArray [20][3]int, Zufallszahl int, slice []int) {
-	fmt.Println("Du befindest dich in Raum : ", zufall)
-	fmt.Println("Angrenzende Räume sind : ", dimensionsArray[zufall-1])
+func angrenzend(raum int, dimensionsArray [20][3]int, zufallszahl int, slice []int) {
+	fmt.Println("Du befindest dich in Raum : ", raum)
+	fmt.Println("Angrenzende Räume sind : ", dimensionsArray[raum-1])
+	number := map[string]int{"loch1": slice[0], "loch2": slice[1], "fledermaus1": slice[2], "fledermaus2": slice[3]}
+	for _, inhalts := range dimensionsArray[raum-1] {
 
-	for _, inhalts := range dimensionsArray[zufall-1] {
-		if inhalts == Zufallszahl {
+		if inhalts == zufallszahl {
 			fmt.Println("Es stinkt bestialisch.")
 		}
-		if inhalts == slice[0] || inhalts == slice[1] {
+		if inhalts == number["loch1"] || inhalts == number["loch2"] {
 			fmt.Println("Du spürst einen Luftzug.")
+
+		}
+		if inhalts == number["fledermaus1"] || inhalts == number["fledermaus2"] {
+			fmt.Println("Du hörst ein Flattern.")
 		}
 	}
 
 	fmt.Print("Wohin möchtest Du gehen? : ")
 	var wohingehen int
 	if _, err := fmt.Scan(&wohingehen); err != nil {
-		fmt.Print("Bitte geben Sie eine Nummer__ ")
+		fmt.Print("Bitte geben Sie eine Nummer ")
 	}
 
-	if wohingehen == Zufallszahl {
+	if wohingehen == zufallszahl {
 		fmt.Println("Du hast das Monster gefunden!")
 		fmt.Println("drücken Sie 'j', um das Spiel zu beenden.Andernfalls geben Sie eine Zahl ein.")
 
@@ -65,59 +53,113 @@ func angrenzend(zufall int, dimensionsArray [20][3]int, Zufallszahl int, slice [
 		}
 	}
 
-	if wohingehen == slice[0] || wohingehen == slice[1] {
-		fmt.Println("Du fällst in ein bodenloses Loch und stirbst.")
-		os.Exit(0)
-
+	if wohingehen == number["loch1"] || wohingehen == number["loch2"] {
+		swi := false
+		for _, inhalt := range dimensionsArray[raum-1] {
+			if inhalt != wohingehen {
+				swi = true
+			} else if inhalt == wohingehen {
+				swi = false
+				break
+			}
+		}
+		if swi == true {
+			fmt.Println("Du kannst von hier nicht in Raum ** ", wohingehen)
+			angrenzend(raum, dimensionsArray, zufallszahl, slice)
+		} else if swi == false {
+			fmt.Println("Du fällst in ein bodenloses Loch und stirbst.")
+			os.Exit(0)
+		}
 	}
-	finder(zufall, wohingehen, dimensionsArray, Zufallszahl, slice)
+
+	if wohingehen == number["fledermaus1"] || wohingehen == number["fledermaus2"] {
+		swi := false
+		for _, inhalt := range dimensionsArray[raum-1] {
+			if inhalt != wohingehen {
+				swi = true
+			} else if inhalt == wohingehen {
+				swi = false
+				break
+			}
+		}
+		if swi == true {
+			fmt.Println("Du kannst von hier nicht in Raum ***", wohingehen)
+			angrenzend(raum, dimensionsArray, zufallszahl, slice)
+
+		} else if swi == false {
+			fmt.Println("Eine riesige Fledermaus pack dich und trägt dich in einen anderen Raum.")
+			raum, zufallszahl, slice = random(slice)
+			startraum(slice, raum, zufallszahl, dimensionsArray)
+		}
+	}
+
+	finder(raum, wohingehen, dimensionsArray, zufallszahl, slice)
 }
 
 func randomint(min, max int) int {
 	return min + rand.Intn(max-min)
 }
-func finder(zufall, wohingehen int, dimensional [20][3]int, Zufallszahl int, slice []int) {
-	indexOfDimensional := dimensional[zufall-1]
+func finder(raum, wohingehen int, dimensional [20][3]int, zufallszahl int, slice []int) {
+	indexOfDimensional := dimensional[raum-1]
 
-	sw, _ := findin(indexOfDimensional[:], wohingehen, Zufallszahl, indexOfDimensional[:])
+	sw, _ := findin(indexOfDimensional[:], wohingehen)
 	if sw == true {
 		fmt.Println("----------------------------")
-		fmt.Println("Zufallszahl(", Zufallszahl, ")")
-		fmt.Println("Loch*(", slice[0], " und ", slice[1], ")")
-		zufall = wohingehen
-		angrenzend(zufall, dimensional, Zufallszahl, slice)
+		fmt.Println("Zufallszahl*(", zufallszahl, ")", "Loch*(", slice[0], ",", slice[1], ")", "Fledermaus*(", slice[2], ",", slice[3], ")")
+
+		raum = wohingehen
+		angrenzend(raum, dimensional, zufallszahl, slice)
 	} else {
 		fmt.Println("Du kannst von hier nicht in Raum ", wohingehen)
-		angrenzend(zufall, dimensional, Zufallszahl, slice)
+		angrenzend(raum, dimensional, zufallszahl, slice)
 	}
 }
 
-func findin(arrayinhalt []int, wohingehen int, Zufallszahl int, s []int) (bool, int) {
+func findin(arrayinhalt []int, wohingehen int) (bool, int) {
 	switchKey := false
 	for _, inhalt := range arrayinhalt {
 		if inhalt == wohingehen {
 			switchKey = true
-			//return switchKey, Zufallszahl
 		}
 	}
 	return switchKey, 0
 }
-func startraum(slice []int, zufall int, dimensionsArray [20][3]int) bool {
 
-	fmt.Println("Loch(", slice[0], " und ", slice[1], ")")
+func startraum(slice []int, raum int, zufallszahl int, dimensionsArray [20][3]int) {
+
+	n := map[string]int{"l1": slice[0], "l2": slice[1], "f1": slice[2], "f2": slice[3], "z": zufallszahl,
+		"d0": dimensionsArray[raum-1][0], "d1": dimensionsArray[raum-1][1], "d2": dimensionsArray[raum-1][2]}
 	switchKey := false
 
-	for _, inhalt := range dimensionsArray[zufall-1] {
-		if inhalt == slice[0] || inhalt == slice[1] {
-			rand.Seed(time.Now().UnixNano())
-			slice := make([]int, 2)
-			slice[0] = randomint(1, 20)
-			slice[1] = randomint(1, 20)
-			switchKey = true
-			continue
-		} else {
-			break
-		}
+	if n["d0"] == n["l1"] || n["d0"] == n["l2"] || n["d0"] == n["f1"] || n["d0"] == n["f2"] ||
+		n["d1"] == n["l1"] || n["d1"] == n["l2"] || n["d1"] == n["f1"] || n["d1"] == n["f2"] ||
+		n["d2"] == n["l1"] || n["d2"] == n["l2"] || n["d2"] == n["f1"] || n["d2"] == n["f2"] ||
+		n["l1"] == n["f1"] || n["l1"] == n["f2"] || n["l2"] == n["f1"] || n["l2"] == n["f2"] ||
+		n["f1"] == n["f2"] || n["l1"] == n["l2"] ||
+		n["z"] == n["l1"] || n["z"] == n["l2"] || n["z"] == n["f1"] || n["z"] == n["f2"] ||
+		n["z"] == n["d0"] || n["z"] == n["d1"] || n["z"] == n["d2"] {
+
+		raum, zufallszahl, slice = random(slice)
+		switchKey = true
+
 	}
-	return switchKey
+	if switchKey == true {
+		startraum(slice, raum, zufallszahl, dimensionsArray)
+
+	} else {
+		//switchKey = false
+		fmt.Println("Zufallszahl(", zufallszahl, ")", "Loch(", slice[0], ",", slice[1], ")", "Fledermaus(", slice[2], ",", slice[3], ")")
+		angrenzend(raum, dimensionsArray, zufallszahl, slice)
+	}
+}
+
+func random(slice []int) (int, int, []int) {
+	rand.Seed(time.Now().UnixNano())
+	raum := randomint(1, 20)
+	zufallszahl := randomint(1, 20)
+	slice[0] = randomint(1, 20)
+	slice[1] = randomint(1, 20)
+	slice[2] = randomint(1, 20)
+	slice[3] = randomint(1, 20)
+	return raum, zufallszahl, slice
 }
